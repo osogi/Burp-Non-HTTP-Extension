@@ -214,7 +214,7 @@ public class SendData implements Runnable{
 				},0, 10*1000); //Check every 10 seconds		
 		
 		while(true && !killme){
-			
+			byte[][] buf=new byte[1][0];
 			int read=-1;
 			try{
 				if(Thread.interrupted()){
@@ -245,7 +245,8 @@ public class SendData implements Runnable{
 					// Check if we have enabled python modifications to the stream
 					if(SERVER.isPythonOn()){
 						pm = new PythonMangler();
-						tmp = pm.mangle(tmp, isC2S);
+						buf = pm.mangle(tmp, isC2S);
+						tmp=buf[0];
 						SendPyOutput(pm);
 						// Check if we updated the data
 						if(!Arrays.equals(tmp,original))
@@ -306,14 +307,14 @@ public class SendData implements Runnable{
 								(this.Name.equals("s2c") && SERVER.getIntercetpDir() == SERVER.INTERCEPT_S2C)
 								){
 							// Here we format the data before sending it to the interceptor
-							if(SERVER.isPythonOn()){
+							/*if(SERVER.isPythonOn()){
 								tmp = pm.preIntercept(tmp, isC2S);
 								SendPyOutput(pm);
 							}
 							if(!Arrays.equals(tmp,original))
 								this.Name = this.Name + " - Formated by Python";
 							else
-								this.Name = this.Name.replace(" - Formated by Python","");
+								this.Name = this.Name.replace(" - Formated by Python","");*/
 							// This will block until the the request if forwarded by the user from the interceptor
 							// This function also handles the events that send the informatoin to the UI and logs.
 							Send2Interceptor(tmp, this.Name, isC2S); 
@@ -339,7 +340,9 @@ public class SendData implements Runnable{
 					}
 					
 					//Write the data back to the socket
-					out.write(tmp);
+					buf[0]=tmp;
+					for (int i=0; i<buf.length; i++) out.write(buf[i]);
+					for(int i=1; i<buf.length; i++) NewDataEvent(buf[i], buf[i], "Reply");
 					
 				
 				
@@ -387,11 +390,13 @@ public class SendData implements Runnable{
 	
 	public void repeatRequest(byte [] repeater){
 		String annotation = "";
+		byte[][] buf= new byte[1][0];
 		byte []original = repeater;
 		try{
 			if(SERVER.isPythonOn()){
 				pm = new PythonMangler();
-				repeater = pm.mangle(repeater, isC2S);
+				buf = pm.mangle(repeater, isC2S);
+				repeater=buf[0];
 				SendPyOutput(pm);
 				if(repeater != original)
 					annotation += " - Modified by Python (mangle)";
@@ -443,8 +448,9 @@ public class SendData implements Runnable{
 				
 			}
 			NewDataEvent(repeater, original, this.Name + " Repeater " + annotation);
-			
-			out.write(repeater);
+			buf[0]=repeater;
+			for(int i=0; i<buf.length; i++){ out.write(buf[i]);}
+			for(int i=1; i<buf.length; i++) NewDataEvent(buf[i], buf[i], "Reply");
 		}catch(Exception ex){
 			
 		}

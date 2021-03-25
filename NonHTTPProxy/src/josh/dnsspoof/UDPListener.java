@@ -52,7 +52,7 @@ public class UDPListener implements Runnable{
 	private static void updateInterface(){
 		String path = System.getProperty("user.home");
 		
-		File f = new File(path + "/.NoPEProxy/dns.properties");
+		File f = new File(path + "/.NoPEProxy/NoPE.properties");
 		Properties config = new Properties();
 		try{
 			if(f.exists()){
@@ -63,7 +63,7 @@ public class UDPListener implements Runnable{
 				if(!p.exists())
 					p.mkdir();
 				f.createNewFile();
-				config.load(ClassLoader.getSystemResourceAsStream("dns.properties"));
+				config.load(ClassLoader.getSystemResourceAsStream("NoPE.properties"));
 				config.store(new FileOutputStream(f), null);
 			}
 			
@@ -76,7 +76,7 @@ public class UDPListener implements Runnable{
 	}
 	private static void updateInterface(String iface){
 		String path = System.getProperty("user.home");
-		File f = new File(path + "/.NoPEProxy/dns.properties");
+		File f = new File(path + "/.NoPEProxy/NoPE.properties");
 		Properties config = new Properties();
 		try{
 			if(f.exists()){
@@ -87,7 +87,7 @@ public class UDPListener implements Runnable{
 				if(!p.exists())
 					p.mkdir();
 				f.createNewFile();
-				config.load(ClassLoader.getSystemResourceAsStream("dns.properties"));
+				config.load(ClassLoader.getSystemResourceAsStream("NoPE.properties"));
 				config.store(new FileOutputStream(f), null);
 			}
 			config.setProperty("interface", iface);

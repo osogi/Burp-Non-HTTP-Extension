@@ -41,19 +41,7 @@ import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.cert.CertificateException;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.Enumeration;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Properties;
-import java.util.Queue;
-import java.util.Timer;
-import java.util.TimerTask;
-import java.util.Vector;
+import java.util.*;
 import javax.swing.event.ChangeListener;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.TableModelEvent;
@@ -167,6 +155,9 @@ public class NonHttpUI extends JPanel implements ProxyEventListener, DNSTableEve
 	public boolean isDNSRunning = false;
 	public boolean isLearning = false;
 	public String DNSIP = "";
+	public boolean python3using=true;
+	public String python2path = "";
+	public String python3path = "";
 	private int IFNUM;
 	JLabel lblCurrentIpAddress = new JLabel("Current Ip Address: ");
 	JCheckBox isSSL;
@@ -180,11 +171,15 @@ public class NonHttpUI extends JPanel implements ProxyEventListener, DNSTableEve
 	JRadioButton isBoth;
 	JRadioButton isC2S;
 	JRadioButton isS2C;
+	JRadioButton usepython2;
+	JRadioButton usepython3;
 	Boolean EnableTCPDump=true;
 	private JTable DnsListTable;
 	public DefaultTableModel dnstTbm;
 	private JLabel errorMsg;
 	public int DNSPort;
+	public int codefont_s;
+	public int consolefont_s;
 	private Table logTable;
 	private JTextField IfTxtBox;
 	private JTextField dnsIpTxt;
@@ -192,8 +187,13 @@ public class NonHttpUI extends JPanel implements ProxyEventListener, DNSTableEve
 	private JTextField LstnPort;
 	private JTextField SvrPort;
 	private JTextField certName;
+	public JTextField txt_python2path;
+	public JTextField txt_python3path;
+	private JTextField txt_codefont_s;
+	private JTextField txt_consolefont_s;
 	private JTable ListTable;
 	private final ButtonGroup buttonGroup = new ButtonGroup();
+	public ButtonGroup pythonChoose = new ButtonGroup();
 	private JLabel interceptInfo;
 	private RSyntaxTextArea txtRules;
 	private JTextField txtDNSPort;
@@ -254,6 +254,37 @@ public class NonHttpUI extends JPanel implements ProxyEventListener, DNSTableEve
 		String tmpPort = this.getProperties("dnsport");
 		if(tmpPort == null || tmpPort.equals(""))
 			tmpPort="5353";
+		python2path = this.getProperties("python2path");
+		if(python2path == null || python2path.equals("")) {
+			python2path = System.getenv("python");
+			if(python2path == null || python2path.equals("")) python2path="/bin/python";
+		};
+
+
+		python3path = this.getProperties("python3using"); //python3path as a buf
+		if((!python3path.equals("false"))||(python3path == null )) python3using=true;
+		else python3using=false;
+
+
+		python3path = this.getProperties("Code_font");//python3path as a buf
+		if(python3path == null || python3path.equals(""))
+			python3path="16";
+		codefont_s=Integer.parseInt(python3path);
+
+		python3path = this.getProperties("Console_font");//python3path as a buf
+		if(python3path == null || python3path.equals(""))
+			python3path="16";
+		consolefont_s=Integer.parseInt(python3path);
+
+		python3path = this.getProperties("python3path");
+		if(python3path == null || python3path.equals("")) {
+			python3path = System.getenv("python3");
+			if(python3path == null || python3path.equals("")) python3path="/bin/python3";
+		};
+
+
+
+
 		JPanel panel_2 = new JPanel();
 		panel_2.setBorder(new TitledBorder(new EtchedBorder(EtchedBorder.LOWERED, null, null), "DNS Settings", TitledBorder.LEADING, TitledBorder.TOP, null, UIManager.getColor("CheckBoxMenuItem.selectionBackground")));
 		GridBagConstraints gbc_panel_2 = new GridBagConstraints();
@@ -1162,6 +1193,7 @@ public class NonHttpUI extends JPanel implements ProxyEventListener, DNSTableEve
 		ptscheme.getStyle(Token.LITERAL_STRING_DOUBLE_QUOTE).foreground = new Color(253, 227, 167);
 		ptscheme.getStyle(Token.OPERATOR).foreground = new Color(137, 196, 244);
 		ptscheme.getStyle(Token.FUNCTION).foreground = new Color(135, 211, 124);
+		ptscheme.getStyle(Token.LITERAL_NUMBER_DECIMAL_INT ).foreground = new Color(120, 37, 150);
 		pyRepeaterCode.setHighlightCurrentLine(false);
 		pyRepeaterCode.revalidate();
 		
@@ -1173,15 +1205,25 @@ public class NonHttpUI extends JPanel implements ProxyEventListener, DNSTableEve
 		gbc_repeaterCodeLabel.gridx = 1;
 		gbc_repeaterCodeLabel.gridy = 1;
 		genCodePanel.add(repeaterCodeLabel, gbc_repeaterCodeLabel);
-		pyRepeaterCode.setBackground(new Color(44, 62, 80));
+		pyRepeaterCode.setBackground(new Color(38, 37, 41));
 		pyRepeaterCode.setForeground(Color.WHITE);
 		
-		GridBagConstraints gbc_pyRepeaterCode = new GridBagConstraints();
+		/*GridBagConstraints gbc_pyRepeaterCode = new GridBagConstraints();
 		gbc_pyRepeaterCode.insets = new Insets(0, 0, 5, 5);
 		gbc_pyRepeaterCode.fill = GridBagConstraints.BOTH;
 		gbc_pyRepeaterCode.gridx = 1;
 		gbc_pyRepeaterCode.gridy = 2;
 		genCodePanel.add(pyRepeaterCode, gbc_pyRepeaterCode);
+		*/
+        JScrollPane scrollPane_02 = new JScrollPane();;
+        GridBagConstraints gbc_scrollPane_02 = new GridBagConstraints();
+        gbc_scrollPane_02.insets = new Insets(0, 0, 5, 5);
+        gbc_scrollPane_02.fill = GridBagConstraints.BOTH;
+        gbc_scrollPane_02.gridx = 1;
+        gbc_scrollPane_02.gridy = 2;
+        genCodePanel.add(scrollPane_02, gbc_scrollPane_02);
+        scrollPane_02.setViewportView(pyRepeaterCode);
+
 		
 		JPanel panel_7 = new JPanel();
 		GridBagConstraints gbc_panel_7 = new GridBagConstraints();
@@ -1197,15 +1239,15 @@ public class NonHttpUI extends JPanel implements ProxyEventListener, DNSTableEve
 		gbl_panel_7.columnWeights = new double[]{0.0, Double.MIN_VALUE};
 		gbl_panel_7.rowWeights = new double[]{0.0, 0.0, 0.0, Double.MIN_VALUE};
 		panel_7.setLayout(gbl_panel_7);
-		
-		JButton rptGenCode = new JButton("Gen Code");
+		//it is don't work
+		/*JButton rptGenCode = new JButton("Gen Code");
 		rptGenCode.setIcon(IconFontSwing.buildIcon(FontAwesome.CODE,18, NopeGreen));
 		GridBagConstraints gbc_rptGenCode = new GridBagConstraints();
 		gbc_rptGenCode.fill = GridBagConstraints.HORIZONTAL;
 		gbc_rptGenCode.insets = new Insets(0, 0, 5, 0);
 		gbc_rptGenCode.gridx = 0;
 		gbc_rptGenCode.gridy = 0;
-		panel_7.add(rptGenCode, gbc_rptGenCode);
+		panel_7.add(rptGenCode, gbc_rptGenCode);*/
 		
 		
 		
@@ -1226,16 +1268,20 @@ public class NonHttpUI extends JPanel implements ProxyEventListener, DNSTableEve
 			public void actionPerformed(ActionEvent e) {
 				String code = pyRepeaterCode.getText();
 				try{
-					HashMap<String, Object> out = PythonMangler.runRepeaterCode(code);
+                    PythonMangler buf= new PythonMangler();
+					HashMap<String, Object> out = buf.runRepeaterCode(code);
+					buf=null;
 					if(out != null){
-						byte [] bytes = (byte []) out.get("out");
+						byte [][] bytes = (byte [][]) out.get("out");
 						repCodeOutput.setText("");
+
 						if(currentListeners.getSelectedItem() != null && bytes != null){
 							String selected = ""+currentListeners.getSelectedItem();
 							String portStr = selected.split("-")[0];
 							int port = Integer.parseInt(portStr.trim());
 							GenericMiTMServer x = threads.get(port);
-							x.repeatToServer(bytes, port);
+							x.repeatToServer(bytes[0], port);
+							parseReplies(bytes, port);
 						}
 						String stdout = ""+out.get("stdout");
 						String stderr = ""+out.get("stderr");
@@ -1277,16 +1323,19 @@ public class NonHttpUI extends JPanel implements ProxyEventListener, DNSTableEve
 				String code = pyRepeaterCode.getText();
 				 
 				try{
-					HashMap<String, Object> out = PythonMangler.runRepeaterCode(code);
+                    PythonMangler buf= new PythonMangler();
+                    HashMap<String, Object> out = buf.runRepeaterCode(code);
+                    buf=null;
 					if(out != null){
-						byte [] bytes = (byte []) out.get("out");
+						byte [][] bytes = (byte [][]) out.get("out");
 						repCodeOutput.setText("");
 						if(currentListeners.getSelectedItem() != null && bytes != null){
 							String selected = ""+currentListeners.getSelectedItem();
 							String portStr = selected.split("-")[0];
 							int port = Integer.parseInt(portStr.trim());
 							GenericMiTMServer x = threads.get(port);
-							x.repeatToClient(bytes, port);
+                            x.repeatToClient(bytes[0], port);
+							parseReplies(bytes, port);
 						}
 						String stdout = ""+out.get("stdout");
 						String stderr = ""+out.get("stderr");
@@ -1298,7 +1347,7 @@ public class NonHttpUI extends JPanel implements ProxyEventListener, DNSTableEve
 					}
 				}catch(Exception ex){
 					repCodeOutput.setText("");
-					repCodeOutput.setText(ex.getMessage()+"\n\nCast exceptions usually are cause becuase you are trying to return something that is not a byte array? \nexample: \n  return bytearray('somestring') ");
+					repCodeOutput.setText(ex.getMessage()+"\n\nCast exceptions usually are cause because you are trying to return something that is not a byte array? \nexample: \n  return bytearray('somestring') ");
 				}
 			}
 		});
@@ -1307,17 +1356,28 @@ public class NonHttpUI extends JPanel implements ProxyEventListener, DNSTableEve
 		gbc_btnClientCode.gridx = 0;
 		gbc_btnClientCode.gridy = 2;
 		panel_7.add(btnClientCode, gbc_btnClientCode);
-		
+
+        JScrollPane scrollPane_01 = new JScrollPane();;
+        GridBagConstraints gbc_scrollPane_01 = new GridBagConstraints();
+        gbc_scrollPane_01.insets = new Insets(0, 0, 0, 5);
+        gbc_scrollPane_01.fill = GridBagConstraints.BOTH;
+        gbc_scrollPane_01.gridx = 1;
+        gbc_scrollPane_01.gridy = 3;
+        genCodePanel.add(scrollPane_01, gbc_scrollPane_01);
+
+
 		repCodeOutput = new RSyntaxTextArea();
 		repCodeOutput.setSyntaxEditingStyle(SyntaxConstants.SYNTAX_STYLE_PYTHON);
-		GridBagConstraints gbc_repCodeOutput = new GridBagConstraints();
+		/*GridBagConstraints gbc_repCodeOutput = new GridBagConstraints();
 		gbc_repCodeOutput.insets = new Insets(0, 0, 0, 5);
 		gbc_repCodeOutput.fill = GridBagConstraints.BOTH;
 		gbc_repCodeOutput.gridx = 1;
 		gbc_repCodeOutput.gridy = 3;
-		genCodePanel.add(repCodeOutput, gbc_repCodeOutput);
+		genCodePanel.add(repCodeOutput, gbc_repCodeOutput);*/
 		repCodeOutput.setColumns(10);
-		rptGenCode.addActionListener(new ActionListener() {
+        scrollPane_01.setViewportView(repCodeOutput);
+
+		/*rptGenCode.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				if(repeater.getMessage() != null){
 					String code = PayloadAnalysis.createPyCode(repeater.getMessage());
@@ -1333,7 +1393,7 @@ public class NonHttpUI extends JPanel implements ProxyEventListener, DNSTableEve
 				}
 				
 			}
-		});
+		});*/
 		
 		
 		JPanel Automation = new JPanel();
@@ -1415,8 +1475,8 @@ public class NonHttpUI extends JPanel implements ProxyEventListener, DNSTableEve
 		panel_8.add(splitPane_2, gbc_splitPane_2);
 		
 		JScrollPane scrollPane_2 = new JScrollPane();
+		//scrollPane_2.setFont(UIManager.getFont("Label.font").deriveFont(40f));
 		splitPane_2.setLeftComponent(scrollPane_2);
-		
 		
 		
 		pythonText = new RSyntaxTextArea();
@@ -1429,15 +1489,16 @@ public class NonHttpUI extends JPanel implements ProxyEventListener, DNSTableEve
 		scheme.getStyle(Token.LITERAL_STRING_DOUBLE_QUOTE).foreground = new Color(253, 227, 167);
 		scheme.getStyle(Token.OPERATOR).foreground = new Color(137, 196, 244);
 		scheme.getStyle(Token.FUNCTION).foreground = new Color(135, 211, 124);
+		scheme.getStyle(Token.LITERAL_NUMBER_DECIMAL_INT ).foreground = new Color(120, 37, 150);
 		
 		
 
 		pythonText.setHighlightCurrentLine(false);
-		
 		pythonText.revalidate();
-		pythonText.setBackground(new Color(44, 62, 80));
+		pythonText.setBackground(new Color(38, 37, 41));
 		pythonText.setForeground(Color.WHITE);
-		pythonText.setFont(UIManager.getFont("Label.font").deriveFont(16f));
+		//font size python console !!!
+
 		pythonText.addKeyListener(new KeyAdapter() {
 			@Override
 			public void keyReleased(KeyEvent arg0) {
@@ -1491,6 +1552,7 @@ public class NonHttpUI extends JPanel implements ProxyEventListener, DNSTableEve
 		matchScheme.getStyle(Token.LITERAL_STRING_DOUBLE_QUOTE).foreground = new Color(253, 227, 167);
 		matchScheme.getStyle(Token.OPERATOR).foreground = new Color(137, 196, 244);
 		matchScheme.getStyle(Token.FUNCTION).foreground = new Color(135, 211, 124);
+		scheme.getStyle(Token.LITERAL_NUMBER_DECIMAL_INT ).foreground = new Color(120, 37, 150);
 		txtRules.revalidate();
 		
 
@@ -2191,7 +2253,7 @@ public class NonHttpUI extends JPanel implements ProxyEventListener, DNSTableEve
 		gbc_lblNopeProxy.gridy = 1;
 		About.add(lblNopeProxy, gbc_lblNopeProxy);
 		
-		JLabel lblVersion = new JLabel("Version 1.5.2");
+		JLabel lblVersion = new JLabel("Version 1.5.2 (improved)");
 		GridBagConstraints gbc_lblVersion = new GridBagConstraints();
 		gbc_lblVersion.insets = new Insets(0, 0, 5, 5);
 		gbc_lblVersion.gridx = 1;
@@ -2244,10 +2306,23 @@ public class NonHttpUI extends JPanel implements ProxyEventListener, DNSTableEve
 		gbc_lblDevelopedByJosh.gridx = 1;
 		gbc_lblDevelopedByJosh.gridy = 4;
 		About.add(lblDevelopedByJosh, gbc_lblDevelopedByJosh);
-		
+
+
+		JLabel impByUser1 = new JLabel("Improved by User1 (dragonmail135159@gmail.com).");
+		GridBagConstraints gbc_impByUser1 = new GridBagConstraints();
+		gbc_impByUser1.insets = new Insets(0, 0, 5, 5);
+		gbc_impByUser1.gridx = 1;
+		gbc_impByUser1.gridy = 5;
+		About.add(impByUser1, gbc_impByUser1);
+
+
 		JButton btnHttpgithubcomsummitt = new JButton("https://github.com/summitt");
 		Icon ghicon = IconFontSwing.buildIcon(Elusive.GITHUB, 23);
 		btnHttpgithubcomsummitt.setIcon(ghicon);
+
+
+
+
 		btnHttpgithubcomsummitt.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
 				try {
@@ -2266,7 +2341,248 @@ public class NonHttpUI extends JPanel implements ProxyEventListener, DNSTableEve
 		gbc_btnHttpgithubcomsummitt.gridx = 1;
 		gbc_btnHttpgithubcomsummitt.gridy = 6;
 		About.add(btnHttpgithubcomsummitt, gbc_btnHttpgithubcomsummitt);
-		
+
+
+		//###############################Settings######################################
+		JPanel Settings = new JPanel();
+		BurpTabs.addTab("Settings   ", IconFontSwing.buildIcon(FontAwesome.WRENCH,16, NopeBlue), Settings, null);
+		GridBagLayout gbl_Settings = new GridBagLayout();
+		gbl_Settings.columnWidths = new int[]{750, 0, 0, 0};
+		gbl_Settings.rowHeights = new int[]{0, 0, 0, 0, 0, 0, 0, 0};
+		gbl_Settings.columnWeights = new double[]{0.0, 1.0, 0.0, Double.MIN_VALUE};
+		gbl_Settings.rowWeights = new double[]{0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, Double.MIN_VALUE};
+		Settings.setLayout(gbl_Settings);
+
+
+
+		JPanel pythonset = new JPanel();
+		pythonset.setBorder(new TitledBorder(new EtchedBorder(EtchedBorder.LOWERED, null, null), "Python settings", TitledBorder.LEADING, TitledBorder.TOP, null, UIManager.getColor("CheckBoxMenuItem.selectionBackground")));
+		GridBagConstraints gbc_pythonset = new GridBagConstraints();
+		gbc_pythonset.fill = GridBagConstraints.BOTH;
+		gbc_pythonset.insets = new Insets(0, 0, 5, 0);
+		gbc_pythonset.gridx = 0;
+		gbc_pythonset.gridy = 0;
+		Settings.add(pythonset, gbc_pythonset);
+		GridBagLayout gbl_pythonset = new GridBagLayout();
+		gbl_pythonset.columnWidths = new int[]{ 0, 10, 0, 0};
+		gbl_pythonset.rowHeights = new int[]{0, 0, 10, 0, 0, 10, 0, 10, 0};
+		gbl_pythonset.columnWeights = new double[]{0.0, 0.0, 1.0, 0.0, Double.MIN_VALUE};
+		gbl_pythonset.rowWeights = new double[]{0.0, 0.0, 0.0, 1.0, Double.MIN_VALUE};
+		pythonset.setLayout(gbl_pythonset);
+
+		usepython2 = new JRadioButton("Use Python 2");
+		usepython2.setFont(new Font("Lucida Grande", Font.PLAIN, 13));
+		usepython2.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				python3using=false;
+				updateProperties("python3using", "false");
+			}
+		});
+		pythonChoose.add(usepython2);
+		GridBagConstraints gbc_usepython2 = new GridBagConstraints();
+		gbc_usepython2.anchor = GridBagConstraints.WEST;
+		gbc_usepython2.insets = new Insets(0, 0, 0, 5);
+		gbc_usepython2.gridx = 1;
+		gbc_usepython2.gridy = 0;
+		pythonset.add(usepython2, gbc_usepython2);
+		if(!python3using) usepython2.setSelected(true);
+		//isS2C.setBounds(734, 206, 56, 23);
+
+		usepython3 = new JRadioButton("Use Python 3");
+		usepython3.setFont(new Font("Lucida Grande", Font.PLAIN, 13));
+		usepython3.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				python3using=true;
+				updateProperties("python3using", "true");
+			}
+		});
+		pythonChoose.add(usepython3);
+		GridBagConstraints gbc_usepython3 = new GridBagConstraints();
+		gbc_usepython3.anchor = GridBagConstraints.WEST;
+		gbc_usepython3.insets = new Insets(0, 0, 0, 5);
+		gbc_usepython3.gridx = 1;
+		gbc_usepython3.gridy = 3;
+		pythonset.add(usepython3, gbc_usepython3);
+		if(python3using) usepython3.setSelected(true);
+		//isBoth.setBounds(800, 206, 66, 23);
+
+
+
+
+		JLabel lblpy2path = new JLabel("Path to Python 2:");
+		lblpy2path.setFont(UIManager.getFont("Label.font").deriveFont(12f));
+		GridBagConstraints gbc_lblpy2path = new GridBagConstraints();
+		gbc_lblpy2path.fill = GridBagConstraints.HORIZONTAL;
+		gbc_lblpy2path.insets = new Insets(0, 0, 5, 5);
+		gbc_lblpy2path.gridx = 1;
+		gbc_lblpy2path.gridy = 1;
+		pythonset.add(lblpy2path, gbc_lblpy2path);
+
+		txt_python2path = new JTextField();
+		//txt_python2path.setToolTipText("");
+		txt_python2path.addKeyListener(new KeyAdapter() {
+			@Override
+			public void keyReleased(KeyEvent e) {
+
+				python2path = txt_python2path.getText();
+				updateProperties("python2path", ""+python2path);
+			}
+		});
+		GridBagConstraints gbc_txt_python2path = new GridBagConstraints();
+		gbc_txt_python2path.anchor = GridBagConstraints.NORTH;
+		gbc_txt_python2path.fill = GridBagConstraints.HORIZONTAL;
+		gbc_txt_python2path.insets = new Insets(0, 0, 5, 0);
+		gbc_txt_python2path.gridx = 2;
+		gbc_txt_python2path.gridy = 1;
+		pythonset.add(txt_python2path, gbc_txt_python2path);
+		//txt_python2path.setColumns(10);
+		txt_python2path.setText(python2path);
+		python2path = txt_python2path.getText();
+
+
+
+		JLabel lblpy3path = new JLabel("Path to Python 3:");
+		lblpy3path.setFont(UIManager.getFont("Label.font").deriveFont(12f));
+		GridBagConstraints gbc_lblpy3path = new GridBagConstraints();
+		gbc_lblpy3path.fill = GridBagConstraints.HORIZONTAL;
+		gbc_lblpy3path.insets = new Insets(0, 0, 5, 5);
+		gbc_lblpy3path.gridx = 1;
+		gbc_lblpy3path.gridy = 4;
+		pythonset.add(lblpy3path, gbc_lblpy3path);
+
+		txt_python3path = new JTextField();
+		//txt_python2path.setToolTipText("");
+		txt_python3path.addKeyListener(new KeyAdapter() {
+			@Override
+			public void keyReleased(KeyEvent e) {
+
+				python3path = txt_python3path.getText();
+				updateProperties("python3path", ""+python3path);
+			}
+		});
+		GridBagConstraints gbc_txt_python3path = new GridBagConstraints();
+		gbc_txt_python3path.anchor = GridBagConstraints.NORTH;
+		gbc_txt_python3path.fill = GridBagConstraints.HORIZONTAL;
+		gbc_txt_python3path.insets = new Insets(0, 0, 5, 0);
+		gbc_txt_python3path.gridx = 2;
+		gbc_txt_python3path.gridy = 4;
+		pythonset.add(txt_python3path, gbc_txt_python3path);
+		//txt_python2path.setColumns(10);
+		txt_python3path.setText(python3path);
+		python3path = txt_python3path.getText();
+
+
+		JButton btnPython2path = new JButton("Browse... ");
+		//btnPython2path.setIcon(IconFontSwing.buildIcon(FontAwesome.FILE_CODE_O,16, NopeGreen));
+		GridBagConstraints gbc_btnPython2path = new GridBagConstraints();
+		gbc_btnPython2path.insets = new Insets(0, 0, 5, 5);
+		gbc_btnPython2path.gridx = 3;
+		gbc_btnPython2path.gridy = 1;
+		pythonset.add(btnPython2path, gbc_btnPython2path);
+
+
+		JButton btnPython3path = new JButton("Browse... ");
+		//btnPython2path.setIcon(IconFontSwing.buildIcon(FontAwesome.FILE_CODE_O,16, NopeGreen));
+		GridBagConstraints gbc_btnPython3path = new GridBagConstraints();
+		gbc_btnPython3path.insets = new Insets(0, 0, 5, 5);
+		gbc_btnPython3path.gridx = 3;
+		gbc_btnPython3path.gridy = 4;
+		pythonset.add(btnPython3path, gbc_btnPython3path);
+
+
+		btnPython2path.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent arg0) {
+				FileDialog fileDialog = new FileDialog(new Frame(), "Python2 ", FileDialog.LOAD);
+				fileDialog.setVisible(true);
+				String filename = fileDialog.getDirectory() + fileDialog.getFile();
+				if(filename != null){
+					txt_python2path.setText(filename);
+					python2path = txt_python2path.getText();
+					updateProperties("python2path", ""+python2path);
+				}
+
+			}
+		});
+
+		btnPython3path.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent arg0) {
+				FileDialog fileDialog = new FileDialog(new Frame(), "Python3 ", FileDialog.LOAD);
+				fileDialog.setVisible(true);
+				String filename = fileDialog.getDirectory() + fileDialog.getFile();
+				if(filename != null){
+					txt_python3path.setText(filename);
+					python3path = txt_python3path.getText();
+					updateProperties("python3path", ""+python3path);
+				}
+
+			}
+		});
+
+		JLabel lblcodefont_s = new JLabel("Code font size: ");
+		lblcodefont_s.setFont(UIManager.getFont("Label.font").deriveFont(12f));
+		GridBagConstraints gbc_lblcodefont_s = new GridBagConstraints();
+		gbc_lblcodefont_s.fill = GridBagConstraints.HORIZONTAL;
+		gbc_lblcodefont_s.insets = new Insets(0, 0, 5, 5);
+		gbc_lblcodefont_s.gridx = 1;
+		gbc_lblcodefont_s.gridy = 6;
+		pythonset.add(lblcodefont_s, gbc_lblcodefont_s);
+
+		txt_codefont_s = new JTextField();
+		txt_codefont_s.setBounds(0, 0, 40,30);
+		txt_codefont_s.addKeyListener(new KeyAdapter() {
+			@Override
+			public void keyReleased(KeyEvent e) {
+				codefont_s = Integer.parseInt(txt_codefont_s.getText());
+				updateProperties("Code_font", ""+codefont_s);
+				pythonText.setFont(new Font(Font.MONOSPACED, Font.PLAIN, codefont_s));
+				pyRepeaterCode.setFont(new Font(Font.MONOSPACED, Font.PLAIN, codefont_s));
+				txtRules.setFont(new Font(Font.MONOSPACED, Font.PLAIN, codefont_s));
+			}
+		});
+		txt_codefont_s.setText(""+codefont_s);
+		GridBagConstraints gbc_txt_codefont_s = new GridBagConstraints();
+		gbc_txt_codefont_s.anchor = GridBagConstraints.NORTHWEST;
+		//gbc_txt_codefont_s.fill = GridBagConstraints.HORIZONTAL;
+		gbc_txt_codefont_s.insets = new Insets(0, 0, 5, 0);
+		gbc_txt_codefont_s.gridx = 2;
+		gbc_txt_codefont_s.gridy = 6;
+		pythonset.add(txt_codefont_s, gbc_txt_codefont_s);
+
+
+		JLabel lblconsolefont_s = new JLabel("Console font size:");
+		lblconsolefont_s.setFont(UIManager.getFont("Label.font").deriveFont(12f));
+		GridBagConstraints gbc_lblconsolefont_s = new GridBagConstraints();
+		gbc_lblconsolefont_s.fill = GridBagConstraints.HORIZONTAL;
+		gbc_lblconsolefont_s.insets = new Insets(0, 0, 5, 5);
+		gbc_lblconsolefont_s.gridx = 1;
+		gbc_lblconsolefont_s.gridy = 8;
+		pythonset.add(lblconsolefont_s, gbc_lblconsolefont_s);
+
+		txt_consolefont_s = new JTextField();
+		txt_consolefont_s.setBounds(0, 0, 40,30);
+		txt_consolefont_s.addKeyListener(new KeyAdapter() {
+			@Override
+			public void keyReleased(KeyEvent e) {
+				consolefont_s = Integer.parseInt(txt_consolefont_s.getText());
+				updateProperties("Console_font", ""+consolefont_s);
+				repCodeOutput.setFont(new Font(Font.MONOSPACED, Font.PLAIN, consolefont_s));
+
+			}
+		});
+		txt_consolefont_s.setText(""+consolefont_s);
+		GridBagConstraints gbc_txt_consolefont_s = new GridBagConstraints();
+		gbc_txt_consolefont_s.anchor = GridBagConstraints.NORTHWEST;
+		//gbc_txt_codefont_s.fill = GridBagConstraints.HORIZONTAL;
+		gbc_txt_consolefont_s.insets = new Insets(0, 0, 5, 0);
+		gbc_txt_consolefont_s.gridx = 2;
+		gbc_txt_consolefont_s.gridy = 8;
+		pythonset.add(txt_consolefont_s, gbc_txt_consolefont_s);
+
+
+
+
+
+
 		BurpTabs.setIconAt(0,IconFontSwing.buildIcon(FontAwesome.EYE,20, NopeBlue));
 		BurpTabs.setIconAt(1,IconFontSwing.buildIcon(FontAwesome.HISTORY,20, NopeOrange));
 		BurpTabs.setIconAt(2,IconFontSwing.buildIcon(FontAwesome.RECYCLE,20, NopePink));
@@ -2274,6 +2590,7 @@ public class NonHttpUI extends JPanel implements ProxyEventListener, DNSTableEve
 		BurpTabs.setIconAt(4,IconFontSwing.buildIcon(GoogleMaterialDesignIcons.PUBLIC,20, NopePurple));
 		BurpTabs.setIconAt(5,IconFontSwing.buildIcon(FontAwesome.COGS,20, NopeRed));
 		BurpTabs.setIconAt(6,IconFontSwing.buildIcon(FontAwesome.INFO,20, NopeGrey));
+		BurpTabs.setIconAt(7,IconFontSwing.buildIcon(FontAwesome.WRENCH,20, NopeBlue));
 		
 		
 		// Add Tabs to main component
@@ -2283,17 +2600,34 @@ public class NonHttpUI extends JPanel implements ProxyEventListener, DNSTableEve
 		//Set DataUpdate Timer
 		timer = new Timer();
 		timer.scheduleAtFixedRate(new UpdateDBTask(queue,ntbm, searchDb, BurpTabs), 0, 1*1500);
-		
+		new Timer().schedule(new TimerTask() {
+			@Override
+		public void run()
+		{
+			pythonText.setFont(new Font(Font.MONOSPACED, Font.PLAIN, codefont_s));
+			pyRepeaterCode.setFont(new Font(Font.MONOSPACED, Font.PLAIN, codefont_s));
+			txtRules.setFont(new Font(Font.MONOSPACED, Font.PLAIN, codefont_s));
+			repCodeOutput.setFont(new Font(Font.MONOSPACED, Font.PLAIN, consolefont_s));
+
+		}}, 3000);
 		
 	    //timer.schedule(new UpdateDBTask(queue,ntbm), 2 * 1000);
-		
-		
+
+//try it there
 
 
 	}
 //############################################################################################################################
 // Supporting Functions
 //############################################################################################################################
+	/*private void set_fonts(RSyntaxTextArea pyRepeaterCode)
+	{
+		pythonText.setFont(new Font(Font.MONOSPACED, Font.PLAIN, codefont_s));
+		pyRepeaterCode.setFont(new Font(Font.MONOSPACED, Font.PLAIN, codefont_s));
+		txtRules.setFont(new Font(Font.MONOSPACED, Font.PLAIN, codefont_s));
+
+	}*/
+
 	private boolean checkCert(){
 		File f = new File("./burpca.p12");
 		if(f.exists()){
@@ -2500,14 +2834,15 @@ public class NonHttpUI extends JPanel implements ProxyEventListener, DNSTableEve
 	}
 	private void updateProperties(String key, String value){
 		Properties config = new Properties();
+
 		try {
-			//config.load(ClassLoader.getSystemResourceAsStream("dns.properties"));
+			//config.load(ClassLoader.getSystemResourceAsStream("NoPE.properties"));
 			String path = System.getProperty("user.home");
-			File f = new File(path + "/.NoPEProxy/dns.properties");
+			File f = new File(path + "/.NoPEProxy/NoPE.properties");
 			if(f.exists()){
 				config.load( new FileInputStream(f));
 			}else{
-				//config.load(ClassLoader.getSystemResourceAsStream("dns.properties"));
+				//config.load(ClassLoader.getSystemResourceAsStream("NoPE.properties"));
 				File p = new File(path + "/.NoPEProxy");
 				if(!p.exists())
 					p.mkdir();
@@ -2533,13 +2868,13 @@ public class NonHttpUI extends JPanel implements ProxyEventListener, DNSTableEve
 	private String getProperties(String key, String defaultValue){
 		Properties config = new Properties();
 		try {
-			//config.load(ClassLoader.getSystemResourceAsStream("dns.properties"));
+			//config.load(ClassLoader.getSystemResourceAsStream("NoPE.properties"));
 			String path = System.getProperty("user.home");
-			File f = new File(path + "/.NoPEProxy/dns.properties");
+			File f = new File(path + "/.NoPEProxy/NoPE.properties");
 			if(f.exists()){
 				config.load( new FileInputStream(f));
 			}else{
-				//config.load(ClassLoader.getSystemResourceAsStream("dns.properties"));
+				//config.load(ClassLoader.getSystemResourceAsStream("NoPE.properties"));
 				File p = new File(path + "/.NoPEProxy");
 				if(!p.exists())
 					p.mkdir();
@@ -2796,7 +3131,7 @@ public class NonHttpUI extends JPanel implements ProxyEventListener, DNSTableEve
 			Output += "<div style='background-color: #2c3e50; color: white; font-family: 'Lucida Console', 'Lucida Sans Typewriter', monaco, 'Bitstream Vera Sans Mono', monospace;'>";
 		Output +="Direction: " + e.getDirection() + " : " + new Date() + "<hr>";
 		if(!e.getMessage().equals("")){
-			Output += "<div style='color:#2ecc71; font-size: 14px;'>";
+			Output += "<div style='color:#2ecc71; font-size: "+consolefont_s+"px;'>";
 			Output += "###Messages:<br>";
 			Output +=  e.getMessage().replace(" ", "&nbsp;").replace("<", "&lt;").replace(">", "&gt;").replace("\n", "<br/>");
 			Output += "</div><br/>";
@@ -2804,7 +3139,7 @@ public class NonHttpUI extends JPanel implements ProxyEventListener, DNSTableEve
 		}
 		
 		if(!e.getError().equals("")){
-			Output += "<div style='color:#c0392b; font-size: 14px;'>";
+			Output += "<div style='color:#c0392b; font-size: "+consolefont_s+"px;'>";
 			Output += "###Errors:<br>";
 			Output += "<br>" + e.getError().replace(" ", "&nbsp;").replace("<", "&lt;").replace(">", "&gt;").replace("\n", "<br/>");
 			Output += "<div><br/>";
@@ -2828,6 +3163,14 @@ public class NonHttpUI extends JPanel implements ProxyEventListener, DNSTableEve
 		System.out.println(e.getMessage());
 		
 	}
+	private void parseReplies(byte[][] bytes, int port)
+		{
+		GenericMiTMServer x = threads.get(port);
+		for (int i=1; i<bytes.length; i++) {
+			if(bytes[i][0]=='s') x.repeatToServer( Arrays.copyOfRange(bytes[i], 1, bytes[i].length), port);
+			else if(bytes[i][0]=='c') x.repeatToClient( Arrays.copyOfRange(bytes[i], 1, bytes[i].length), port);
+		}
+		}
 	public JTextArea getTxtRules() {
 		return txtRules;
 	}
