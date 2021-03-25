@@ -46,7 +46,7 @@ import burp.*;
 	    {
 	        mCallbacks = callbacks;
 			helpers = mCallbacks.getHelpers();
-			mCallbacks.setExtensionName("NoPE Proxy");
+			mCallbacks.setExtensionName("NoPE Proxy(improved)");
 			mCallbacks.registerContextMenuFactory(this);
 			
 			
